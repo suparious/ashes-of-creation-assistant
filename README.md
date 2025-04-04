@@ -1,151 +1,146 @@
-# MyAshes.ai - Ashes of Creation Assistant
+# MyAshes.ai - AI-Powered Assistant for Ashes of Creation
 
-A comprehensive AI-powered assistant and toolkit for the MMORPG game Ashes of Creation. This project helps players discover information about the game, plan character builds, optimize crafting, and engage with the game more effectively.
+MyAshes.ai is a comprehensive AI-powered companion app for the MMORPG game Ashes of Creation. The application provides a chat interface, character build planner, item database, crafting calculator, resource map, and more to help players optimize their gameplay experience.
 
-![MyAshes.ai Logo](frontend/public/images/logo.png)
+## Features
 
-## 🌟 Features
+- **AI Assistant**: Chat with an AI that understands game mechanics and can answer questions about Ashes of Creation
+- **Character Build Planner**: Create, save, and share character builds
+- **Item Database**: Search and explore all items in the game
+- **Crafting Calculator**: Plan your crafting activities and calculate costs
+- **Resource Map**: Find gathering locations for resources
+- **Economy Tracker**: Monitor server economies and track resource prices
+- **Discord Bot Integration**: Access all the features directly from Discord
 
-- **AI-Powered Chat Assistant**: Get instant answers to your questions about Ashes of Creation, including items, locations, crafting, game mechanics, and more.
-- **Character Build Planner**: Create and share optimized character builds with detailed skills and equipment loadouts.
-- **Crafting Calculator**: Plan your crafting projects and calculate required materials efficiently.
-- **Interactive World Map**: Explore game zones and locate resources, NPCs, and other points of interest.
-- **Economy Tracker**: Stay updated on item values and market trends across different game servers.
-- **Discord Integration**: Access all features directly from Discord with our companion bot.
+## Architecture
 
-## 🏗️ Architecture
+The application consists of several components:
 
-MyAshes.ai is built with a modern, scalable architecture:
+1. **Frontend**: Next.js, React, TypeScript, and Tailwind CSS
+2. **Backend API**: Python FastAPI
+3. **Data Pipeline**: Python scrapers and vector indexing
+4. **Discord Bot**: Python-based bot integration
+5. **Authentication System**: JWT-based user authentication
+6. **Vector Store**: Milvus for semantic search
 
-- **Frontend**: Next.js, React, TypeScript, Tailwind CSS
-- **Backend**: Python FastAPI with asyncio for high performance
-- **Vector Database**: Milvus for efficient semantic search
-- **Cache**: Redis for fast data access and session management
-- **LLM Integration**: Compatible with OpenAI API and other OpenAI-compatible endpoints
-- **Deployment**: Docker and Docker Compose for easy setup and scaling
-- **Proxy/SSL**: Nginx with Let's Encrypt for secure HTTPS connections
+## Getting Started
 
-## 📋 Prerequisites
+### Prerequisites
 
 - Docker and Docker Compose
-- Nvidia GPU with CUDA support (recommended)
-- Domain name (for production deployment)
-- OpenAI API key or compatible alternative
-- Discord Bot Token (optional)
+- Node.js 18+ (for local frontend development)
+- Python 3.10+ (for local backend development)
+- OpenAI API key
 
-## 🚀 Getting Started
-
-### Local Development
+### Installation
 
 1. Clone the repository:
-   ```bash
+   ```
    git clone https://github.com/yourusername/ashes-of-creation-assistant.git
    cd ashes-of-creation-assistant
    ```
 
-2. Create .env file from example:
-   ```bash
+2. Create a `.env` file based on the example:
+   ```
    cp docker/.env.example docker/.env
    ```
 
-3. Edit the .env file with your API keys and configuration.
+3. Update the `.env` file with your configuration:
+   - Set your OpenAI API key
+   - Configure database credentials
+   - Set other environment variables as needed
 
-4. Start the development environment:
-   ```bash
+4. Start the application with Docker Compose:
+   ```
    cd docker
    docker-compose up -d
    ```
 
 5. Access the application:
    - Frontend: http://localhost:3000
-   - API: http://localhost:8000
+   - Backend API: http://localhost:8000
+   - API Documentation: http://localhost:8000/docs
+
+## Development
+
+### Frontend Development
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend will be available at http://localhost:3000.
+
+### Backend Development
+
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+The backend API will be available at http://localhost:8000.
+
+### Database Migrations
+
+```bash
+cd backend
+alembic upgrade head  # Apply all migrations
+alembic revision --autogenerate -m "Description"  # Create a new migration
+```
+
+## Authentication System
+
+The application uses a JWT-based authentication system:
+
+1. **Registration**: Create an account with email, username, and password
+2. **Login**: Authenticate and receive a JWT token
+3. **Password Reset**: Request a password reset link via email
+4. **Profile Management**: Update profile information and preferences
+
+### JWT Security
+
+- Access tokens expire after 60 minutes
+- Password reset tokens expire after 24 hours
+- All endpoints requiring authentication use Bearer token scheme
+
+## Deployment
 
 ### Production Deployment
 
-1. Set up your domain DNS to point to your server.
-
-2. Update the Nginx configuration in `nginx/conf/myashes.conf` with your domain.
-
-3. Start with Docker Compose:
-   ```bash
-   cd docker
-   docker-compose -f docker-compose.yml up -d
+1. Update the production configuration in `docker/docker-compose.prod.yml`
+2. Deploy using the provided CI/CD workflow or manually:
+   ```
+   ./scripts/deployment/deploy.sh production
    ```
 
-4. SSL certificates will be automatically obtained via Let's Encrypt.
-
-## 🧠 Data Pipeline
-
-The data pipeline collects and processes game information for the AI assistant:
-
-1. **Scraping**: Collects data from multiple sources including the official wiki, Ashes Codex, and official website.
-2. **Processing**: Chunks and cleans the data for optimal LLM context usage.
-3. **Indexing**: Creates vector embeddings and stores in Milvus for semantic search.
-4. **Updating**: Runs on a schedule to keep data fresh and accurate.
-
-## 🤖 Discord Bot
-
-The Discord bot allows players to interact with the assistant directly from Discord:
-
-1. Create a bot on the [Discord Developer Portal](https://discord.com/developers/applications).
-2. Set the required permissions (read/send messages, use slash commands).
-3. Add the bot token to your .env file.
-4. Invite the bot to your server.
-
-Commands:
-- `/ask [question]`: Ask a question about Ashes of Creation
-- `/server [servername]`: Set your game server context
-- `/reset`: Reset your chat history
-
-## 📊 Scaling Considerations
-
-- The system is designed to handle thousands of concurrent users.
-- For very high volumes, consider:
-  - Horizontal scaling with multiple backend instances
-  - Dedicated database servers
-  - CDN for static content
-  - Rate limiting for API endpoints
-
-## 🔄 Updating Game Data
-
-The data pipeline automatically updates game information, but you can trigger manual updates:
+### Staging Deployment
 
 ```bash
-docker-compose exec data-pipeline python main.py --dev
+./scripts/deployment/deploy.sh staging
 ```
 
-## 🛠️ Customization
+## Monitoring and Maintenance
 
-### Using Different LLM Providers
+- Monitoring is set up using Prometheus and Grafana
+- Database backups run daily and are stored in S3
+- Log files are rotated and monitored
 
-You can use any OpenAI-compatible API endpoint by setting the following environment variables:
+## Contributing
 
-```
-OPENAI_API_KEY=your_api_key
-OPENAI_API_BASE=https://your-endpoint.com/v1
-OPENAI_MODEL=your-model-name
-```
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-### Embedding Models
-
-The default embedding model is `BAAI/bge-large-en-v1.5`. To change it, set:
-
-```
-EMBEDDING_MODEL=your/model/name
-```
-
-## 📜 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 📞 Contact
+## Acknowledgments
 
-For questions, features, and bug reports, please open an issue on GitHub or contact the project maintainers.
-
-## 🔮 Roadmap
-
-- Mobile app integration
-- Real-time market data scraping
-- Integration with game client via add-ons
-- Group planning tools for guilds
-- Tournament and event tracking
+- The Ashes of Creation community for their contributions and feedback
+- Intrepid Studios for creating Ashes of Creation

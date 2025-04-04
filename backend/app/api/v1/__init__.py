@@ -1,15 +1,12 @@
-from .chat import router as chat_router
-from .builds import router as build_router
-from .servers import router as server_router
-from .items import router as items_router
-from .locations import router as locations_router
-from .crafting import router as crafting_router
+from fastapi import APIRouter
 
-__all__ = [
-    "chat_router",
-    "build_router", 
-    "server_router",
-    "items_router",
-    "locations_router",
-    "crafting_router"
-]
+from app.api.v1.auth.router import router as auth_router
+from app.api.v1.users.router import router as users_router
+
+api_router = APIRouter()
+
+# Include all API routers
+api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
+api_router.include_router(users_router, prefix="/users", tags=["users"])
+
+# Add additional routers here as they are created

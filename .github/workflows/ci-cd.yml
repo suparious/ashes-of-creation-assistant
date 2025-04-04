@@ -1,0 +1,410 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment Environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  lint:
+    name: Linting
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [frontend, backend, data-pipeline]
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js (for frontend)
+        if: matrix.component == 'frontend'
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Set up Python (for backend/data-pipeline)
+        if: matrix.component != 'frontend'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+          
+      - name: Install frontend dependencies
+        if: matrix.component == 'frontend'
+        run: |
+          cd frontend
+          npm ci
+          
+      - name: Install backend dependencies
+        if: matrix.component == 'backend'
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install flake8 mypy
+          
+      - name: Install data-pipeline dependencies
+        if: matrix.component == 'data-pipeline'
+        run: |
+          cd data-pipeline
+          pip install -r requirements.txt
+          pip install flake8 mypy
+          
+      - name: Lint frontend
+        if: matrix.component == 'frontend'
+        run: |
+          cd frontend
+          npm run lint
+          
+      - name: Lint backend
+        if: matrix.component == 'backend'
+        run: |
+          cd backend
+          flake8 app
+          mypy app
+          
+      - name: Lint data-pipeline
+        if: matrix.component == 'data-pipeline'
+        run: |
+          cd data-pipeline
+          flake8 app
+          mypy app
+
+  test:
+    name: Testing
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [frontend, backend, data-pipeline]
+    services:
+      # Add services like postgres/redis/milvus if needed for tests
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js (for frontend)
+        if: matrix.component == 'frontend'
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Set up Python (for backend/data-pipeline)
+        if: matrix.component != 'frontend'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+          
+      - name: Install frontend dependencies
+        if: matrix.component == 'frontend'
+        run: |
+          cd frontend
+          npm ci
+          
+      - name: Install backend dependencies
+        if: matrix.component == 'backend'
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+          
+      - name: Install data-pipeline dependencies
+        if: matrix.component == 'data-pipeline'
+        run: |
+          cd data-pipeline
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+          
+      - name: Test frontend
+        if: matrix.component == 'frontend'
+        run: |
+          cd frontend
+          npm test -- --coverage
+          
+      - name: Test backend
+        if: matrix.component == 'backend'
+        env:
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          TESTING: true
+        run: |
+          cd backend
+          pytest app/tests --cov=app
+          
+      - name: Test data-pipeline
+        if: matrix.component == 'data-pipeline'
+        env:
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          TESTING: true
+        run: |
+          cd data-pipeline
+          pytest app/tests --cov=app
+          
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          flags: ${{ matrix.component }}
+
+  build:
+    name: Build Docker Images
+    needs: test
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      frontend_image: ${{ steps.image-tags.outputs.frontend_image }}
+      backend_image: ${{ steps.image-tags.outputs.backend_image }}
+      data_pipeline_image: ${{ steps.image-tags.outputs.data_pipeline_image }}
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_BASE: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Generate image tags
+        id: image-tags
+        run: |
+          # Generate tag based on timestamp and short commit SHA
+          TAG="$(date +%Y%m%d%H%M%S)-${GITHUB_SHA::8}"
+          
+          # Output full image names with tags
+          echo "frontend_image=${REGISTRY}/${IMAGE_BASE}/frontend:${TAG}" >> $GITHUB_OUTPUT
+          echo "backend_image=${REGISTRY}/${IMAGE_BASE}/backend:${TAG}" >> $GITHUB_OUTPUT
+          echo "data_pipeline_image=${REGISTRY}/${IMAGE_BASE}/data-pipeline:${TAG}" >> $GITHUB_OUTPUT
+          
+          # Also tag with branch name or 'latest' for main branch
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "frontend_latest=${REGISTRY}/${IMAGE_BASE}/frontend:latest" >> $GITHUB_OUTPUT
+            echo "backend_latest=${REGISTRY}/${IMAGE_BASE}/backend:latest" >> $GITHUB_OUTPUT
+            echo "data_pipeline_latest=${REGISTRY}/${IMAGE_BASE}/data-pipeline:latest" >> $GITHUB_OUTPUT
+          else
+            BRANCH_NAME=$(echo ${{ github.ref }} | sed 's/refs\/heads\///')
+            echo "frontend_latest=${REGISTRY}/${IMAGE_BASE}/frontend:${BRANCH_NAME}" >> $GITHUB_OUTPUT
+            echo "backend_latest=${REGISTRY}/${IMAGE_BASE}/backend:${BRANCH_NAME}" >> $GITHUB_OUTPUT
+            echo "data_pipeline_latest=${REGISTRY}/${IMAGE_BASE}/data-pipeline:${BRANCH_NAME}" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ steps.image-tags.outputs.frontend_image }}
+            ${{ steps.image-tags.outputs.frontend_latest }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          
+      - name: Build and push backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ steps.image-tags.outputs.backend_image }}
+            ${{ steps.image-tags.outputs.backend_latest }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          
+      - name: Build and push data-pipeline image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./data-pipeline
+          push: true
+          tags: |
+            ${{ steps.image-tags.outputs.data_pipeline_image }}
+            ${{ steps.image-tags.outputs.data_pipeline_latest }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: build
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ env.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
+          
+      - name: Create deployment directory on server
+        run: |
+          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "mkdir -p ${{ env.DEPLOY_PATH }}/staging"
+          
+      - name: Copy docker-compose files to server
+        run: |
+          scp docker/docker-compose.yml docker/docker-compose.staging.yml ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:${{ env.DEPLOY_PATH }}/staging/
+          
+      - name: Create .env file on server
+        run: |
+          cat << EOF > .env.tmp
+          FRONTEND_IMAGE=${{ needs.build.outputs.frontend_image }}
+          BACKEND_IMAGE=${{ needs.build.outputs.backend_image }}
+          DATA_PIPELINE_IMAGE=${{ needs.build.outputs.data_pipeline_image }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          ENVIRONMENT=staging
+          DOMAIN=${{ secrets.DOMAIN }}
+          EOF
+          
+          scp .env.tmp ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:${{ env.DEPLOY_PATH }}/staging/.env
+          rm .env.tmp
+          
+      - name: Deploy to staging server
+        run: |
+          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.DEPLOY_PATH }}/staging && docker compose -f docker-compose.yml -f docker-compose.staging.yml pull && docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d"
+          
+      - name: Run database migrations
+        run: |
+          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.DEPLOY_PATH }}/staging && docker compose -f docker-compose.yml -f docker-compose.staging.yml exec -T backend alembic upgrade head"
+          
+      - name: Notify Slack on success
+        if: success()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: deployments
+          SLACK_COLOR: good
+          SLACK_TITLE: Staging Deployment Successful
+          SLACK_MESSAGE: "MyAshes.ai has been successfully deployed to staging! 🚀"
+          
+      - name: Notify Slack on failure
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: deployments
+          SLACK_COLOR: danger
+          SLACK_TITLE: Staging Deployment Failed
+          SLACK_MESSAGE: "⚠️ Staging deployment of MyAshes.ai has failed! Check the GitHub Actions logs."
+
+  deploy-production:
+    name: Deploy to Production
+    needs: build
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ env.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
+          
+      - name: Create deployment directory on server
+        run: |
+          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "mkdir -p ${{ env.DEPLOY_PATH }}/production"
+          
+      - name: Copy docker-compose files to server
+        run: |
+          scp docker/docker-compose.yml docker/docker-compose.prod.yml ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:${{ env.DEPLOY_PATH }}/production/
+          
+      - name: Create .env file on server
+        run: |
+          cat << EOF > .env.tmp
+          FRONTEND_IMAGE=${{ needs.build.outputs.frontend_image }}
+          BACKEND_IMAGE=${{ needs.build.outputs.backend_image }}
+          DATA_PIPELINE_IMAGE=${{ needs.build.outputs.data_pipeline_image }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          ENVIRONMENT=production
+          DOMAIN=${{ secrets.DOMAIN }}
+          EOF
+          
+          scp .env.tmp ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:${{ env.DEPLOY_PATH }}/production/.env
+          rm .env.tmp
+          
+      - name: Deploy to production server
+        run: |
+          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.DEPLOY_PATH }}/production && docker compose -f docker-compose.yml -f docker-compose.prod.yml pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d"
+          
+      - name: Run database migrations
+        run: |
+          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.DEPLOY_PATH }}/production && docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T backend alembic upgrade head"
+          
+      - name: Wait for health checks
+        run: |
+          # Wait for health checks to pass
+          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.DEPLOY_PATH }}/production && docker compose -f docker-compose.yml -f docker-compose.prod.yml ps | grep -q 'healthy' || (sleep 30 && docker compose -f docker-compose.yml -f docker-compose.prod.yml ps | grep -q 'healthy')"
+          
+      - name: Notify Slack on success
+        if: success()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: deployments
+          SLACK_COLOR: good
+          SLACK_TITLE: Production Deployment Successful
+          SLACK_MESSAGE: "MyAshes.ai has been successfully deployed to production! 🚀"
+          
+      - name: Notify Slack on failure
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: deployments
+          SLACK_COLOR: danger
+          SLACK_TITLE: Production Deployment Failed
+          SLACK_MESSAGE: "⚠️ Production deployment of MyAshes.ai has failed! Check the GitHub Actions logs."
