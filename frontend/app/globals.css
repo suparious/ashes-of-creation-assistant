@@ -2,174 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 248, 249, 250;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 31, 32, 40;
-    --background-end-rgb: 24, 24, 30;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+ 
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+ 
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+ 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+ 
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
   }
 }
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
-}
-
-/* Dark mode scrollbar */
-.dark ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* Quality colors for items */
-.quality-common {
-  @apply text-gray-200;
-}
-
-.quality-uncommon {
-  @apply text-green-400;
-}
-
-.quality-rare {
-  @apply text-blue-400;
-}
-
-.quality-epic {
-  @apply text-purple-400;
-}
-
-.quality-legendary {
-  @apply text-yellow-400;
-}
-
-.quality-mythic {
-  @apply text-red-400;
-}
-
-/* Chat UI Styles */
-.chat-message {
-  @apply p-4 rounded-lg mb-4 max-w-[85%] relative;
-}
-
-.chat-message.user {
-  @apply bg-blue-100 dark:bg-blue-900/30 ml-auto;
-}
-
-.chat-message.assistant {
-  @apply bg-gray-100 dark:bg-gray-800/50 mr-auto;
-}
-
-/* Build planner styles */
-.build-slot {
-  @apply border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-2 min-h-[80px] flex items-center justify-center;
-}
-
-.build-slot.filled {
-  @apply border-solid border-blue-500 dark:border-blue-600;
-}
-
-/* Card styles */
-.game-card {
-  @apply bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg;
-}
-
-.card-hover-effect {
-  @apply transition-transform duration-300 hover:-translate-y-1;
-}
-
-/* Loading animations */
-.loading-spinner {
-  @apply animate-spin h-5 w-5 text-white;
-}
-
-.loading-pulse {
-  @apply animate-pulse-slow;
-}
-
-/* Tooltip */
-.tooltip {
-  @apply absolute z-50 p-2 text-sm bg-black text-white rounded shadow-lg opacity-0 invisible transition-opacity duration-200;
-}
-
-.tooltip-trigger:hover .tooltip {
-  @apply opacity-100 visible;
-}
-
-/* Custom styling for markdown content */
-.markdown-content h1 {
-  @apply text-2xl font-bold mb-4 mt-6;
-}
-
-.markdown-content h2 {
-  @apply text-xl font-bold mb-3 mt-5;
-}
-
-.markdown-content h3 {
-  @apply text-lg font-bold mb-2 mt-4;
-}
-
-.markdown-content p {
-  @apply mb-4;
-}
-
-.markdown-content ul {
-  @apply list-disc pl-5 mb-4;
-}
-
-.markdown-content ol {
-  @apply list-decimal pl-5 mb-4;
-}
-
-.markdown-content li {
-  @apply mb-1;
-}
-
-.markdown-content a {
-  @apply text-blue-500 hover:underline;
-}
-
-.markdown-content blockquote {
-  @apply border-l-4 border-gray-200 dark:border-gray-700 pl-4 italic my-4;
-}
-
-.markdown-content code {
-  @apply font-mono text-sm bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded;
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

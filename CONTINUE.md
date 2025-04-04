@@ -1,207 +1,316 @@
-# MyAshes.ai Project Context and Continuation Guide
+# MyAshes.ai Project Context and Technical Documentation
 
 ## Project Overview
-MyAshes.ai is an AI-powered assistant application for the MMORPG game "Ashes of Creation." The project combines data from the game with AI capabilities to provide players with a comprehensive companion app including a chat interface, character build planner, item database, crafting calculator, resource map, economy tracker, and more.
+MyAshes.ai is an AI-powered assistant application for the MMORPG game "Ashes of Creation." The project combines game data with AI capabilities to provide features including chat interface, character build planner, item database, crafting calculator, resource map, economy tracker, and other tools to enhance player experience.
 
-## Architecture and Stack
-The project follows a modern, containerized microservice architecture:
+## Technical Architecture
 
-1. **Frontend**: Next.js 13+ (App Router), React, TypeScript, Tailwind CSS
-   - UI components built with shadcn/ui
-   - State management using Zustand
-   - Authentication with JWT stored in localStorage
+### Frontend (Next.js Application)
+- **Framework**: Next.js 13+ with App Router
+- **Language**: TypeScript
+- **State Management**: Zustand
+- **Styling**: Tailwind CSS
+- **UI Components**: Custom components built on Radix UI (shadcn/ui pattern)
+- **Authentication**: JWT stored in localStorage with auto-refresh
+- **Path**: `C:\Users\shaun\repos\ashes-of-creation-assistant\frontend`
 
-2. **Backend**: Python FastAPI
-   - RESTful API endpoints
-   - JWT authentication
-   - Database ORM with SQLAlchemy
-   - Database migrations with Alembic
+### Backend (FastAPI)
+- **Framework**: Python FastAPI
+- **Database ORM**: SQLAlchemy
+- **Migrations**: Alembic
+- **Authentication**: JWT-based with token refresh
+- **Path**: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend`
 
-3. **Data Pipeline**: Python
-   - Data scraping and processing
-   - Vector embeddings with semantic search
-   - Integration with game client data
+### Data Pipeline
+- **Language**: Python
+- **Vector Store**: Milvus
+- **Embedding Model**: OpenAI embeddings
+- **Path**: `C:\Users\shaun\repos\ashes-of-creation-assistant\data-pipeline`
 
-4. **Authentication System**: 
-   - JWT-based auth
-   - User registration, login, password reset
-   - Profile management
-   - Preference persistence
+### Discord Bot
+- **Language**: Python
+- **Framework**: discord.py
+- **Integration**: OpenAI API
+- **Path**: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\api\discord_bot.py`
 
-5. **Infrastructure**:
-   - Docker containerization
-   - CI/CD workflows with GitHub Actions
-   - Monitoring with Prometheus/Grafana
-   - Database backups to S3
+### Infrastructure
+- **Containerization**: Docker
+- **CI/CD**: GitHub Actions workflows
+- **Path**: `C:\Users\shaun\repos\ashes-of-creation-assistant\.github\workflows` and `C:\Users\shaun\repos\ashes-of-creation-assistant\docker`
 
-## Current Implementation Status
+## Frontend Component Structure
 
-### Completed Components:
+### UI Components
+The following UI components have been implemented in the `C:\Users\shaun\repos\ashes-of-creation-assistant\frontend\components\ui` directory:
 
-1. **Frontend Pages and Features**:
-   - Main application layout
-   - Chat interface
-   - Authentication UI (login, register, forgot password)
-   - Profile management
-   - Item database list view
-   - Item detail page
-   - Economy tracker
-   - Build comparison tool
-   - Navigation and responsive design
+- `alert/index.tsx`: Notification alerts
+- `avatar/index.tsx`: User avatars with image and fallback
+- `badge/index.tsx`: Status or category badges
+- `button/index.tsx`: Various button styles
+- `card/index.tsx`: Card containers with header/content/footer
+- `checkbox/index.tsx`: Form checkboxes
+- `dialog/index.tsx`: Modal dialogs
+- `dropdown-menu/index.tsx`: Dropdown menus
+- `input/index.tsx`: Form input fields
+- `label/index.tsx`: Form labels
+- `loading-spinner.tsx`: Loading indicator
+- `progress/index.tsx`: Progress bars
+- `separator/index.tsx`: Horizontal/vertical separators
+- `switch/index.tsx`: Toggle switches
+- `tabs/index.tsx`: Tabbed interfaces
+- `theme-provider/index.tsx`: Dark/light theme provider
 
-2. **Backend API Endpoints**:
-   - Authentication system (register, login, token refresh)
-   - User management (profile, preferences)
-   - Chat functionality with vector search
-   - Item data retrieval
+### Layout Components
+- `layout/navbar.tsx`: Top navigation bar
+- `layout/footer.tsx`: Page footer
 
-3. **Authentication System**:
-   - JWT token generation and validation
-   - Password hashing and verification
-   - User registration and login flows
-   - Password reset functionality
-   - Profile management
+### Auth Components
+- `auth/require-auth.tsx`: Authentication guard for protected routes
 
-4. **Infrastructure**:
-   - Docker setup for development and production
-   - CI/CD workflow configuration
-   - Database migration system
-   - Deployment scripts
-   - Monitoring configuration
-   - Backup scripts
+### Page Components
+The following pages have been implemented:
 
-5. **Discord Bot**:
-   - Basic bot structure
-   - Chat integration with AI
-   - Enhanced slash commands
-   - Embed formatting for responses
-   - Pagination for search results
+- `app/auth/login/page.tsx`: User login
+- `app/auth/register/page.tsx`: User registration
+- `app/auth/forgot-password/page.tsx`: Password reset request
+- `app/profile/page.tsx`: User profile management
+- `app/items/page.tsx`: Item database listing
+- `app/items/[id]/page.tsx`: Item detail view
+- `app/economy/page.tsx`: Economy tracker
+- `app/builds/compare/page.tsx`: Build comparison tool
 
-### Components Requiring Additional Work:
+### State Management
+- `stores/auth.ts`: Authentication state management with Zustand
 
-1. **Data Pipeline Enhancement**:
-   - More sophisticated chunking strategies
-   - Data validation and normalization
-   - Optimized indexing for vector search
-   - Game client data extraction
-   - Regular data update workflows
+### Utilities
+- `lib/utils.ts`: Utility functions for UI components
 
-2. **Feature Completion**:
-   - Advanced filtering for items and builds
-   - User build saving and sharing
-   - Community features (comments, ratings)
-   - Premium membership features
-   - Server-specific data handling
+## Backend Structure
 
-3. **Performance Optimization**:
-   - Caching strategies
-   - Query optimization
-   - Image optimization and CDN integration
-   - SSR/SSG optimization for critical pages
+### API Endpoints
+- Auth routes: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\api\v1\auth\router.py`
+- User routes: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\api\v1\users\router.py`
 
-## Database Models
+### Database Models
+- User models: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\models\user.py`
 
-Key database models include:
+### Schemas
+- Auth schemas: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\schemas\auth.py`
+- User schemas: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\schemas\users.py`
 
-- **User**: Authentication and profile data
-- **UserPreference**: User settings and preferences
-- **SavedItem**: User-saved game items
-- **Build**: Character builds created by users
+### Core Functionality
+- Security: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\core\security.py`
+- Config: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\core\config.py`
 
-Database migrations are handled through Alembic, with the initial migration setting up the core tables.
+### Database
+- Base class: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\db\base_class.py`
+- Session: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\db\session.py`
+
+### Services
+- Email service: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\services\email.py`
+
+### CRUD Operations
+- User operations: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\crud\users.py`
+
+### Migrations
+- Path: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\migrations`
+- Initial migration: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\migrations\versions\initial_migration.py`
+
+## Data Pipeline Structure
+
+### Extractors
+- Game client data: `C:\Users\shaun\repos\ashes-of-creation-assistant\data-pipeline\app\extractors\game_client_extractor.py`
+
+### Processors
+- Data validation: `C:\Users\shaun\repos\ashes-of-creation-assistant\data-pipeline\app\processors\validator.py`
+- Text chunking: `C:\Users\shaun\repos\ashes-of-creation-assistant\data-pipeline\app\processors\chunker.py`
+
+## Infrastructure and Deployment
+
+### CI/CD Workflow
+- GitHub Actions: `C:\Users\shaun\repos\ashes-of-creation-assistant\.github\workflows\ci-cd.yml`
+
+### Deployment Scripts
+- Manual deployment: `C:\Users\shaun\repos\ashes-of-creation-assistant\scripts\deployment\deploy.sh`
+- Environment configs: 
+  - `C:\Users\shaun\repos\ashes-of-creation-assistant\scripts\deployment\config.staging.sh`
+  - `C:\Users\shaun\repos\ashes-of-creation-assistant\scripts\deployment\config.production.sh`
+
+### Monitoring
+- Setup script: `C:\Users\shaun\repos\ashes-of-creation-assistant\scripts\monitoring\setup-monitoring.sh`
+
+### Backup
+- Database backup: `C:\Users\shaun\repos\ashes-of-creation-assistant\scripts\backup\backup-database.sh`
+- Backup configs: `C:\Users\shaun\repos\ashes-of-creation-assistant\scripts\backup\config.production.sh`
+
+## Database Schema
+
+### Users Table
+- id: Integer (PK)
+- email: String (unique)
+- username: String (unique)
+- display_name: String
+- hashed_password: String
+- bio: Text
+- is_active: Boolean
+- is_verified: Boolean
+- is_premium: Boolean
+- created_at: DateTime
+- updated_at: DateTime
+
+### UserPreference Table
+- id: Integer (PK)
+- user_id: Integer (FK to users.id)
+- email_notifications: Boolean
+- discord_notifications: Boolean
+- dark_mode: Boolean
+- compact_layout: Boolean
+- additional_preferences: JSON
+- updated_at: DateTime
+
+### SavedItem Table
+- id: Integer (PK)
+- user_id: Integer (FK to users.id)
+- item_id: String
+- notes: Text
+- created_at: DateTime
+
+### Build Table (Placeholder)
+- id: Integer (PK)
+- user_id: Integer (FK to users.id)
+- name: String
+- description: Text
+- data: JSON
+- is_public: Boolean
+- created_at: DateTime
+- updated_at: DateTime
 
 ## Authentication Flow
 
-1. User registers or logs in, receiving a JWT token
-2. Token is stored in localStorage and included in the Authorization header
-3. Protected routes are wrapped with RequireAuth component
-4. Token is refreshed automatically when needed
-5. User preferences and settings are stored in the database
+1. User registers with email, username, password
+2. User confirms email (optional flow)
+3. User logs in with email/password, receives JWT token
+4. Token is stored in localStorage and included in Authorization header
+5. Protected routes are wrapped with RequireAuth component
+6. Token is automatically refreshed when needed
+7. Password reset flow: request → email → reset page → password update
 
-## Project Structure Highlights
+## Discord Bot Features
 
-- `/frontend`: Next.js application
-  - `/app`: Application routes using App Router
-  - `/components`: Reusable UI components
-  - `/stores`: Zustand state management
-  - `/data`: Static data files
+- Chat command: Answers player questions using AI
+- Server command: Sets server context for user
+- Reset command: Clears chat history
+- Direct message support: Processes DMs as questions
+- Enhanced slash commands: Multiple game-related commands
+- Structured embeds: Formatted responses
+- Pagination: For search results
 
-- `/backend`: FastAPI application
-  - `/app`: API implementation
-  - `/api`: API routes and endpoints
-  - `/models`: Database models
-  - `/schemas`: Pydantic schemas
-  - `/services`: Business logic services
-  - `/core`: Core functionality (auth, config)
+## Dependencies
 
-- `/data-pipeline`: Data processing services
-  - `/app`: Pipeline implementation
-  - `/processors`: Data transformation logic
-  - `/scrapers`: Web scrapers for game data
-  - `/extractors`: Game client data extraction
+### Frontend Dependencies
+- next
+- react
+- react-dom
+- typescript
+- tailwindcss
+- @radix-ui/react-* (various UI components)
+- lucide-react (icons)
+- zustand (state management)
+- recharts (charts and visualizations)
+- class-variance-authority
+- clsx
+- tailwind-merge
+- next-themes
 
-- `/scripts`: Utility scripts
-  - `/deployment`: Deployment automation
-  - `/backup`: Backup procedures
-  - `/monitoring`: Monitoring setup
+### Backend Dependencies
+- fastapi
+- uvicorn
+- sqlalchemy
+- alembic
+- pydantic
+- python-jose[cryptography]
+- passlib[bcrypt]
+- aiohttp
+- python-multipart
+- redis
+- loguru
+- pymilvus
+- openai
 
-- `/docker`: Docker configuration
-  - Docker Compose files for different environments
+## Development Workflow
 
-## Approach to Continue Development
+1. **Running Frontend**: 
+   ```
+   cd frontend
+   npm install
+   npm run dev
+   ```
 
-When approaching continued development:
+2. **Running Backend**:
+   ```
+   cd backend
+   pip install -r requirements.txt
+   uvicorn app.main:app --reload
+   ```
 
-1. **Understand Current State**: For a new feature request, first assess what components already exist and what needs to be added or modified.
+3. **Database Migrations**:
+   ```
+   cd backend
+   alembic upgrade head
+   ```
 
-2. **Check Frontend/Backend Integration**: Ensure any new frontend features have corresponding backend endpoints, and vice versa.
+4. **Running with Docker**:
+   ```
+   cd docker
+   docker-compose up -d
+   ```
 
-3. **Maintain Architecture Patterns**: Follow established patterns for feature implementation:
-   - Frontend: Create pages in the app directory, utilize Zustand for state, use shadcn/ui components
-   - Backend: Implement with FastAPI endpoints, SQLAlchemy models, Pydantic schemas, and service layer for business logic
+## Implementation Status and Next Steps
 
-4. **Authentication Awareness**: Remember that most features should respect the authentication system, with appropriate permissions and user-specific data.
+### Fully Implemented Components
+- Authentication system (frontend & backend)
+- User profile management
+- Basic UI components
+- Discord bot with slash commands
+- CI/CD workflows
+- Item database views
+- Economy tracker
+- Build comparison tool
+- Data pipeline extractors and processors
 
-5. **Database Considerations**: For features requiring database changes, create Alembic migrations to maintain schema integrity.
+### Components Needing Implementation or Improvement
+- Chat interface backend API
+- Vector search integration
+- Build saving functionality
+- Item filtering and search
+- Resource map with interactive locations
+- Crafting calculator
+- Community features (comments, ratings)
 
-6. **Docker Integration**: Ensure new services or dependencies are properly reflected in Docker configuration.
+### Known Issues and Gaps
+- The application requires additional UI components in some sections
+- Some frontend routes need to be protected with authentication
+- Backend endpoints for item details and economy data need to be completed
+- Vector search optimization required for better performance
+- Database schema needs extensions for builds, items, and other game data
 
-## Vector Search Implementation
+## Technical Details for Vector Search
 
-The application uses Milvus as the vector database for semantic search:
+The application uses a vector search approach for finding relevant game information:
 
-1. Text from game data is chunked and embedded using OpenAI embeddings
-2. Vectors are stored in Milvus with metadata
-3. User queries are embedded and matched against the knowledge base
-4. Results are retrieved with contextual information preserved
+1. Game content is chunked using the SmartChunker or HierarchicalChunker
+2. Text chunks are embedded using OpenAI embeddings
+3. Embeddings are stored in Milvus with metadata
+4. User queries are embedded and compared against stored vectors
+5. Results are ranked by cosine similarity and returned with context
 
-## Next Steps
+## File Structure Conventions
 
-Priority features to implement next:
+- React components use PascalCase for filenames
+- TypeScript interfaces and types use PascalCase
+- Backend routes use snake_case
+- API endpoints follow RESTful conventions
+- Frontend pages are in the app directory using Next.js App Router structure
+- UI components in dedicated component directories with index.tsx files
 
-1. Complete the data pipeline enhancement for efficient content extraction and indexing
-2. Finalize the build planner with save/load functionality
-3. Implement the community features for build sharing and commenting
-4. Build the crafting calculator with real-time economic data
-5. Create the resource map with interactive locations
-
-## Troubleshooting Common Issues
-
-- **Authentication Issues**: Check JWT token expiration and refresh mechanisms
-- **Frontend/Backend Integration**: Verify API endpoint URLs and response formats
-- **Docker Deployment**: Ensure environment variables are properly passed to containers
-- **Database Migrations**: Run migrations before starting services after schema changes
-
-## Working With This Repository
-
-To continue development:
-
-1. Understand the requirements of the specific feature requested
-2. Identify relevant components in the codebase to modify or extend
-3. Check for existing implementations of similar features for patterns
-4. Implement both frontend and backend aspects of the feature
-5. Consider test cases and potential edge conditions
-6. Ensure compatibility with the authentication system where appropriate
-7. Document any new API endpoints or configurations
-
-This guide should serve as a comprehensive reference for continuing work on the MyAshes.ai project, providing necessary context on architecture, implemented features, and best practices.
+This document is for AI assistant use only to understand the complete MyAshes.ai project structure, implementation details, and technical specifics when continuing development. The information is presented in high technical detail specifically for AI comprehension, not for human readability.
