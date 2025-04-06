@@ -35,13 +35,15 @@ The application consists of several components:
 ### Installation
 
 1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/ashes-of-creation-assistant.git
+
+   ```bash
+   git clone git@github.com:SolidRusT/ashes-of-creation-assistant.git
    cd ashes-of-creation-assistant
    ```
 
 2. Create a `.env` file based on the example:
-   ```
+
+   ```bash
    cp docker/.env.example docker/.env
    ```
 
@@ -51,7 +53,8 @@ The application consists of several components:
    - Set other environment variables as needed
 
 4. Start the application with Docker Compose:
-   ```
+
+   ```bash
    cd docker
    docker-compose up -d
    ```
@@ -112,7 +115,8 @@ The application uses a JWT-based authentication system:
 
 1. Update the production configuration in `docker/docker-compose.prod.yml`
 2. Deploy using the provided CI/CD workflow or manually:
-   ```
+
+   ```bash
    ./scripts/deployment/deploy.sh production
    ```
 
@@ -138,7 +142,7 @@ The application uses a JWT-based authentication system:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details. All intellectual property and assets related to Ashes of Creation are reserved by Intrepid Studios. This site is fan-made and not affiliated with Ashes of Creation or Intrepid Studios.
 
 ## Acknowledgments
 
