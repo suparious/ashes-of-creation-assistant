@@ -30,12 +30,16 @@
     "recharts": "^2.7.2",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.6",
-    "zustand": "^4.3.9"
+    "zustand": "^4.3.9",
+    "framer-motion": "^10.16.5",
+    "react-markdown": "^8.0.7",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "20.4.5",
     "@types/react": "18.2.18",
     "@types/react-dom": "18.2.7",
+    "@types/uuid": "^9.0.1",
     "autoprefixer": "10.4.14",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.12",

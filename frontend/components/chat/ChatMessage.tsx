@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Message } from '@/types/chat'
-import Image from 'next/image'
 
 interface ChatMessageProps {
   message: Message
@@ -33,14 +32,10 @@ export default function ChatMessage({ message }: ChatMessageProps) {
               U
             </div>
           ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <Image
-                src="/images/assistant-avatar.png"
-                alt="AI Assistant"
-                width={32}
-                height={32}
-                className="object-cover"
-              />
+            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+              </svg>
             </div>
           )}
         </div>

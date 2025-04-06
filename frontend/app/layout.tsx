@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import Navbar from '@/components/layout/navbar';
-import Footer from '@/components/layout/footer';
+import Footer from '@/components/layout/Footer';
 import { initializeAuth } from '@/stores/auth';
 
 const inter = Inter({ subsets: ['latin'] });

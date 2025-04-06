@@ -7,7 +7,7 @@ WORKDIR /app
 # Install dependencies - this is done in a separate stage so that it can be cached
 FROM base AS deps
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Development stage - used when developing locally
 FROM base AS dev

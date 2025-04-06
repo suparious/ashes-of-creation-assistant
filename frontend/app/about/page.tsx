@@ -173,42 +173,30 @@ export default function AboutPage() {
             
             <div className="flex flex-col md:flex-row justify-center items-center gap-6">
               <div className="text-center">
-                <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-2">
-                  <Image
-                    src="/images/team/founder.jpg"
-                    alt="Founder"
-                    width={96}
-                    height={96}
-                    className="object-cover"
-                  />
+                <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden mx-auto mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
                 <h3 className="font-medium dark:text-white">Alex Chen</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Founder & Lead Developer</p>
               </div>
               
               <div className="text-center">
-                <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-2">
-                  <Image
-                    src="/images/team/ai-lead.jpg"
-                    alt="AI Lead"
-                    width={96}
-                    height={96}
-                    className="object-cover"
-                  />
+                <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden mx-auto mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
                 <h3 className="font-medium dark:text-white">Sarah Johnson</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">AI Research Lead</p>
               </div>
               
               <div className="text-center">
-                <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-2">
-                  <Image
-                    src="/images/team/game-expert.jpg"
-                    alt="Game Expert"
-                    width={96}
-                    height={96}
-                    className="object-cover"
-                  />
+                <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden mx-auto mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
                 <h3 className="font-medium dark:text-white">Michael Torres</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Game Systems Expert</p>
