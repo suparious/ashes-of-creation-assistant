@@ -7,11 +7,12 @@ beautifulsoup4==4.12.2
 pandas==2.1.2
 numpy==1.26.1
 pillow==11.1.0
-torch==2.6.0
-torchvision==0.16.0
+torch==2.1.2
+torchvision==0.16.2
+torchaudio==2.1.2
 tqdm==4.67.1
 loguru==0.7.2
-pydantic==2.4.2
+pydantic>=2.0.0,<2.7.0
 asyncio==3.4.3
 aiohttp==3.11.16
 playwright==1.39.0
@@ -19,5 +20,6 @@ lxml==4.9.3
 streamlit==1.44.1
 selenium==4.15.2
 tenacity==8.2.3
-langchain==0.3.23
+langchain>=0.2.0,<0.3.0
+langchain-openai>=0.1.0,<0.2.0
 schedule==1.2.1
