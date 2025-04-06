@@ -89,7 +89,51 @@ jobs:
       matrix:
         component: [frontend, backend, data-pipeline]
     services:
-      # Add services like postgres/redis/milvus if needed for tests
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          
+      milvus-standalone:
+        image: milvusdb/milvus:v2.3.3
+        env:
+          ETCD_ENDPOINTS: etcd:2379
+          MINIO_ADDRESS: minio:9000
+        ports:
+          - 19530:19530
+        options: >
+          --health-cmd "curl -f http://localhost:9091/api/v1/health"
+          --health-interval 30s
+          --health-timeout 10s
+          --health-retries 3
+          --health-start-period 40s
+        
+      etcd:
+        image: quay.io/coreos/etcd:v3.5.5
+        env:
+          ETCD_AUTO_COMPACTION_MODE: revision
+          ETCD_AUTO_COMPACTION_RETENTION: "1000"
+          ETCD_QUOTA_BACKEND_BYTES: "4294967296"
+        options: >-
+          --command="etcd --advertise-client-urls=http://127.0.0.1:2379 --listen-client-urls=http://0.0.0.0:2379 --data-dir=/etcd"
+      
+      minio:
+        image: minio/minio:RELEASE.2023-03-20T20-16-18Z
+        env:
+          MINIO_ACCESS_KEY: minioadmin
+          MINIO_SECRET_KEY: minioadmin
+        options: >-
+          --command="minio server /data"
+      
       redis:
         image: redis
         ports:
@@ -148,6 +192,15 @@ jobs:
         env:
           REDIS_HOST: localhost
           REDIS_PORT: 6379
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+          MILVUS_HOST: localhost
+          MILVUS_PORT: 19530
+          MILVUS_USER: root
+          MILVUS_PASSWORD: Milvus
           TESTING: true
         run: |
           cd backend
@@ -158,6 +211,15 @@ jobs:
         env:
           REDIS_HOST: localhost
           REDIS_PORT: 6379
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+          MILVUS_HOST: localhost
+          MILVUS_PORT: 19530
+          MILVUS_USER: root
+          MILVUS_PASSWORD: Milvus
           TESTING: true
         run: |
           cd data-pipeline
@@ -290,11 +352,23 @@ jobs:
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_USER=${{ secrets.POSTGRES_USER }}
           POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          POSTGRES_HOST=postgres
+          POSTGRES_PORT=5432
+          MILVUS_USER=${{ secrets.MILVUS_USER }}
+          MILVUS_PASSWORD=${{ secrets.MILVUS_PASSWORD }}
+          MILVUS_HOST=milvus-standalone
+          MILVUS_PORT=19530
+          MILVUS_COLLECTION=ashes_knowledge
           REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          REDIS_HOST=redis
+          REDIS_PORT=6379
           OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_BASE=https://api.openai.com/v1
+          OPENAI_MODEL=gpt-4o
           JWT_SECRET=${{ secrets.JWT_SECRET }}
           ENVIRONMENT=staging
           DOMAIN=${{ secrets.DOMAIN }}
+          NEXT_PUBLIC_API_URL=https://api.${{ secrets.DOMAIN }}
           EOF
           
           scp .env.tmp ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:${{ env.DEPLOY_PATH }}/staging/.env
@@ -304,9 +378,10 @@ jobs:
         run: |
           ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.DEPLOY_PATH }}/staging && docker compose -f docker-compose.yml -f docker-compose.staging.yml pull && docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d"
           
-      - name: Run database migrations
+      # Database migrations are now handled by the backend entrypoint script
+      - name: Verify service health
         run: |
-          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.DEPLOY_PATH }}/staging && docker compose -f docker-compose.yml -f docker-compose.staging.yml exec -T backend alembic upgrade head"
+          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.DEPLOY_PATH }}/staging && docker compose -f docker-compose.yml -f docker-compose.staging.yml ps"
           
       - name: Notify Slack on success
         if: success()
@@ -366,11 +441,23 @@ jobs:
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_USER=${{ secrets.POSTGRES_USER }}
           POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          POSTGRES_HOST=postgres
+          POSTGRES_PORT=5432
+          MILVUS_USER=${{ secrets.MILVUS_USER }}
+          MILVUS_PASSWORD=${{ secrets.MILVUS_PASSWORD }}
+          MILVUS_HOST=milvus-standalone
+          MILVUS_PORT=19530
+          MILVUS_COLLECTION=ashes_knowledge
           REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          REDIS_HOST=redis
+          REDIS_PORT=6379
           OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_BASE=https://api.openai.com/v1
+          OPENAI_MODEL=gpt-4o
           JWT_SECRET=${{ secrets.JWT_SECRET }}
           ENVIRONMENT=production
           DOMAIN=${{ secrets.DOMAIN }}
+          NEXT_PUBLIC_API_URL=https://api.${{ secrets.DOMAIN }}
           EOF
           
           scp .env.tmp ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:${{ env.DEPLOY_PATH }}/production/.env
@@ -380,9 +467,10 @@ jobs:
         run: |
           ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.DEPLOY_PATH }}/production && docker compose -f docker-compose.yml -f docker-compose.prod.yml pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d"
           
-      - name: Run database migrations
+      # Database migrations are now handled by the backend entrypoint script
+      - name: Verify service health
         run: |
-          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.DEPLOY_PATH }}/production && docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T backend alembic upgrade head"
+          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.DEPLOY_PATH }}/production && docker compose -f docker-compose.yml -f docker-compose.prod.yml ps"
           
       - name: Wait for health checks
         run: |
