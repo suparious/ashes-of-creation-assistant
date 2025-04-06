@@ -36,7 +36,73 @@ MyAshes.ai is an AI-powered assistant application for the MMORPG game "Ashes of 
 ### Infrastructure
 - **Containerization**: Docker
 - **CI/CD**: GitHub Actions workflows
+- **Database**: PostgreSQL
+- **Vector Database**: Milvus with authentication
+- **Caching**: Redis
+- **Web Server**: Nginx as reverse proxy with SSL
 - **Path**: `C:\Users\shaun\repos\ashes-of-creation-assistant\.github\workflows` and `C:\Users\shaun\repos\ashes-of-creation-assistant\docker`
+
+## Docker Environment Configuration
+
+### Docker Compose Files
+- `docker-compose.yml`: Main configuration with all services
+- `docker-compose.dev.yml`: Development-specific overrides
+- `docker-compose.prod.yml`: Production-specific optimizations
+- `.env`: Environment variables (created based on .env.example)
+
+### Services
+1. **Frontend** (Next.js)
+   - Exposed on port 3000
+   - Environment variables include NEXT_PUBLIC_API_URL
+
+2. **Backend** (FastAPI)
+   - Exposed on port 8000
+   - Uses custom entrypoint script for database migrations
+   - Dependencies include PostgreSQL, Milvus, Redis
+
+3. **Data Pipeline**
+   - Processes and indexes game data
+   - Dependencies include PostgreSQL, Milvus, Redis
+
+4. **PostgreSQL**
+   - Exposed on port 5432
+   - Credentials: POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+   - Persistent volume: postgres-data
+
+5. **Milvus**
+   - Vector database with authentication enabled
+   - Exposed on ports 19530 and 9091
+   - Depends on Etcd and MinIO
+   - Authentication variables: MILVUS_USER, MILVUS_PASSWORD
+
+6. **Redis**
+   - Exposed on port 6379
+   - Password authentication: REDIS_PASSWORD
+
+7. **Nginx**
+   - Reverse proxy with SSL termination
+   - Exposed on ports 80 and 443
+   - SSL configuration for myashes.ai domain
+
+8. **Certbot**
+   - Automatic SSL certificate generation
+   - Let's Encrypt integration
+
+### Environment Variables
+Critical environment variables in `.env`:
+- `OPENAI_API_KEY`: Used for AI features
+- `MILVUS_USER` and `MILVUS_PASSWORD`: Vector database authentication
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`: Database credentials
+- `REDIS_PASSWORD`: Redis authentication
+- `NEXT_PUBLIC_API_URL`: Frontend API endpoint
+
+### Database Migration Setup
+The backend uses an entrypoint script (`entrypoint.sh`) that:
+1. Waits for PostgreSQL to become available
+2. Runs Alembic migrations automatically
+3. Starts the FastAPI application
+
+This ensures database schema is ready before application starts.
 
 ## Frontend Component Structure
 
@@ -85,6 +151,12 @@ The following pages have been implemented:
 ### Utilities
 - `lib/utils.ts`: Utility functions for UI components
 
+### Next.js Configuration
+The `next.config.js` includes:
+- Output set to 'standalone' for Docker deployment
+- API proxy configuration via rewrites
+- Image domains whitelist for game resources
+
 ## Backend Structure
 
 ### API Endpoints
@@ -108,6 +180,7 @@ The following pages have been implemented:
 
 ### Services
 - Email service: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\services\email.py`
+- Vector store: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\services\vector_store.py`
 
 ### CRUD Operations
 - User operations: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\app\crud\users.py`
@@ -115,6 +188,12 @@ The following pages have been implemented:
 ### Migrations
 - Path: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\migrations`
 - Initial migration: `C:\Users\shaun\repos\ashes-of-creation-assistant\backend\migrations\versions\initial_migration.py`
+- Creates tables: users, user_preferences, saved_items, builds
+
+### Deployment Configuration
+- Dockerfile specifies CUDA base image for AI features
+- Entrypoint script manages database initialization and application startup
+- Required dependencies installed via requirements.txt
 
 ## Data Pipeline Structure
 
@@ -124,6 +203,20 @@ The following pages have been implemented:
 ### Processors
 - Data validation: `C:\Users\shaun\repos\ashes-of-creation-assistant\data-pipeline\app\processors\validator.py`
 - Text chunking: `C:\Users\shaun\repos\ashes-of-creation-assistant\data-pipeline\app\processors\chunker.py`
+
+### Indexers
+- Vector indexer: `C:\Users\shaun\repos\ashes-of-creation-assistant\data-pipeline\app\indexers\vector_indexer.py`
+- Handles Milvus connections with authentication
+
+### Scrapers
+- Wiki scraper: `C:\Users\shaun\repos\ashes-of-creation-assistant\data-pipeline\app\scrapers\wiki_scraper.py`
+- Codex scraper: `C:\Users\shaun\repos\ashes-of-creation-assistant\data-pipeline\app\scrapers\codex_scraper.py`
+- Official website scraper: `C:\Users\shaun\repos\ashes-of-creation-assistant\data-pipeline\app\scrapers\official_website_scraper.py`
+
+### Main Process
+- Scheduled execution with configurable interval
+- Initial full scrape followed by incremental updates
+- Multi-step pipeline with logging
 
 ## Infrastructure and Deployment
 
@@ -142,6 +235,11 @@ The following pages have been implemented:
 ### Backup
 - Database backup: `C:\Users\shaun\repos\ashes-of-creation-assistant\scripts\backup\backup-database.sh`
 - Backup configs: `C:\Users\shaun\repos\ashes-of-creation-assistant\scripts\backup\config.production.sh`
+
+### Nginx Configuration
+- SSL termination with Let's Encrypt
+- Path: `C:\Users\shaun\repos\ashes-of-creation-assistant\nginx\conf\myashes.conf`
+- Error pages: 404.html, 50x.html in `C:\Users\shaun\repos\ashes-of-creation-assistant\nginx\www`
 
 ## Database Schema
 
@@ -236,6 +334,11 @@ The following pages have been implemented:
 - loguru
 - pymilvus
 - openai
+- sentence-transformers
+- langchain
+- langchain-openai
+- psycopg2-binary
+- email-validator
 
 ## Development Workflow
 
@@ -265,6 +368,18 @@ The following pages have been implemented:
    docker-compose up -d
    ```
 
+5. **Development with Docker**:
+   ```
+   cd docker
+   docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+   ```
+
+6. **Production Deployment**:
+   ```
+   cd docker
+   docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+   ```
+
 ## Implementation Status and Next Steps
 
 ### Fully Implemented Components
@@ -277,6 +392,9 @@ The following pages have been implemented:
 - Economy tracker
 - Build comparison tool
 - Data pipeline extractors and processors
+- Docker environment with PostgreSQL, Milvus, Redis
+- Database migration system
+- Nginx configuration with SSL
 
 ### Components Needing Implementation or Improvement
 - Chat interface backend API
@@ -303,6 +421,28 @@ The application uses a vector search approach for finding relevant game informat
 3. Embeddings are stored in Milvus with metadata
 4. User queries are embedded and compared against stored vectors
 5. Results are ranked by cosine similarity and returned with context
+
+## Docker Environment Details
+
+### Milvus Configuration
+- Authentication enabled with COMMON_SECURITY_ENABLED=true
+- Credentials passed through environment variables
+- Connection handled in vector_store.py and vector_indexer.py
+
+### PostgreSQL Integration
+- Database initialized through entrypoint script
+- Alembic handles migrations automatically
+- Connection parameters from environment variables
+
+### Redis Configuration
+- Password authentication required
+- Used for caching and session storage
+
+### Directory Structure
+- `nginx/ssl`: SSL certificates
+- `nginx/www`: Static files and error pages
+- `nginx/letsencrypt`: Let's Encrypt certificates
+- `data-pipeline/app/logs`: Log storage for data pipeline
 
 ## File Structure Conventions
 
