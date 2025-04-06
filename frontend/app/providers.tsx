@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider } from '@/components/theme/ThemeProvider'
+import { ThemeProvider } from '@/components/ui/theme-provider'
 
 // Create a client
 const queryClient = new QueryClient({
