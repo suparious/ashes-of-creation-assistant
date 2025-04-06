@@ -3,16 +3,7 @@
 import { Suspense } from 'react'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
-function DashboardContent() {
-  return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-      <p className="text-gray-500 dark:text-gray-400">
-        Welcome to your Ashes of Creation assistant dashboard!
-      </p>
-    </div>
-  )
-}
+import DashboardContent from '@/components/dashboard/DashboardContent'
 
 export default function DashboardPage() {
   return (

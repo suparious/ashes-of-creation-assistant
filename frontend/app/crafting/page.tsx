@@ -3,16 +3,7 @@
 import { Suspense } from 'react'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
-function CraftingContent() {
-  return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Crafting Calculator</h1>
-      <p className="text-gray-500 dark:text-gray-400">
-        This feature is under development. Check back soon!
-      </p>
-    </div>
-  )
-}
+import CraftingContent from '@/components/crafting/CraftingContent'
 
 export default function CraftingPage() {
   return (
