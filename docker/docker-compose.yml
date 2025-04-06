@@ -28,6 +28,8 @@ services:
       - MILVUS_PORT=19530
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - MILVUS_USER=${MILVUS_USER}
+      - MILVUS_PASSWORD=${MILVUS_PASSWORD}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_API_BASE=${OPENAI_API_BASE:-https://api.openai.com/v1}
       - LOG_LEVEL=info
@@ -57,6 +59,8 @@ services:
       - MILVUS_PORT=19530
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - MILVUS_USER=${MILVUS_USER}
+      - MILVUS_PASSWORD=${MILVUS_PASSWORD}
       - SCRAPE_INTERVAL=86400  # 24 hours in seconds
       - LOG_LEVEL=info
     volumes:
@@ -81,6 +85,11 @@ services:
     environment:
       - ETCD_ENDPOINTS=etcd:2379
       - MINIO_ADDRESS=minio:9000
+      # Add authentication settings
+      - ETCD_USE_EMBED=true
+      - COMMON_SECURITY_ENABLED=true
+      - COMMON_SECURITY_USERNAME=${MILVUS_USER}
+      - COMMON_SECURITY_PASSWORD=${MILVUS_PASSWORD}
     volumes:
       - milvus-data:/var/lib/milvus
     ports:
