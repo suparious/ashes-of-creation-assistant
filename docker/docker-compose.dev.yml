@@ -30,25 +30,56 @@ services:
 
   # Milvus with development settings
   milvus-standalone:
-    ports:
-      - "19530:19530"  # Expose API port for direct access in development
-      - "9091:9091"    # Expose UI port
+    # Override the security_opt to allow running in development environments
+    security_opt:
+      - seccomp:unconfined
+    # We'll keep the ports the same as they're already exposed in the base file
     environment:
       - ETCD_USE_EMBED=true
-      - COMMON_SECURITY_ENABLED=true
-      - COMMON_SECURITY_USERNAME=${MILVUS_USER:-milvus_user}
-      - COMMON_SECURITY_PASSWORD=${MILVUS_PASSWORD:-milvus_password}
+      - COMMON_SECURITY_ENABLED=false  # Disable security for easier development
+    healthcheck:
+      # More lenient healthcheck for development
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 120s
+    # Use a named volume for development to persist data between restarts
+    volumes:
+      - milvus-dev-data:/var/lib/milvus
+
+  # Etcd with development settings
+  etcd:
+    # Fix the advertise URL issue
+    command: etcd --advertise-client-urls=http://etcd:2379 --listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+    healthcheck:
+      # More lenient healthcheck for development
+      interval: 60s
+      timeout: 30s
+      retries: 5
+    volumes:
+      - etcd-dev-data:/etcd
+
+  # MinIO with development settings
+  minio:
+    ports:
+      - "9001:9001"  # Make MinIO console accessible in development
+    volumes:
+      - minio-dev-data:/data
+    # Keep the command with console address from the base file
 
   # Redis with development settings
   redis:
     ports:
-      - "6379:6379"    # Expose Redis port for direct access
+      - "6379:6379"  # Expose Redis port for direct access
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-ashes_default_pass} --loglevel debug
+    volumes:
+      - redis-dev-data:/data
 
   # Development-friendly Nginx configuration
   nginx:
     volumes:
       - ../nginx/conf/myashes.dev.conf:/etc/nginx/conf.d/default.conf
+      - ../nginx/www:/var/www/html
     depends_on:
       - frontend
       - backend
@@ -60,8 +91,18 @@ services:
   # PostgreSQL with development settings
   postgres:
     ports:
-      - "5432:5432"    # Expose PostgreSQL port for direct access
+      - "5432:5432"  # Expose PostgreSQL port for direct access
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
       - POSTGRES_DB=${POSTGRES_DB:-ashes_dev}
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+
+volumes:
+  # Development-specific volumes to avoid conflicts with production
+  milvus-dev-data:
+  etcd-dev-data:
+  minio-dev-data:
+  redis-dev-data:
+  postgres-dev-data:

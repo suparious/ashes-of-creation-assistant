@@ -22,26 +22,101 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   # Data pipeline optimized for production
   data-pipeline:
     restart: always
     environment:
       - LOG_LEVEL=info
-
-  # Milvus with production settings
-  milvus-standalone:
-    restart: always
     deploy:
       resources:
         limits:
           cpus: '2'
           memory: 4G
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Milvus with production settings
+  milvus-standalone:
+    restart: always
+    security_opt:
+      - seccomp:unconfined
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 30s
+      start_period: 90s
+      timeout: 20s
+      retries: 3
+    environment:
+      - ETCD_ENDPOINTS=etcd:2379
+      - MINIO_ADDRESS=minio:9000
+      - ETCD_USE_EMBED=true
+      - COMMON_SECURITY_ENABLED=true
+      - COMMON_SECURITY_USERNAME=${MILVUS_USER}
+      - COMMON_SECURITY_PASSWORD=${MILVUS_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 8G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
+
+  # Etcd with production settings
+  etcd:
+    restart: always
+    command: etcd --advertise-client-urls=http://etcd:2379 --listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
     logging:
       driver: "json-file"
       options:
         max-size: "50m"
         max-file: "10"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+
+  # MinIO with production settings
+  minio:
+    restart: always
+    command: minio server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
 
   # Redis with production settings
   redis:
@@ -52,24 +127,6 @@ services:
         limits:
           cpus: '1'
           memory: 1.5G
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "50m"
-        max-file: "10"
-
-  # Etcd with production settings
-  etcd:
-    restart: always
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "50m"
-        max-file: "10"
-
-  # MinIO with production settings
-  minio:
-    restart: always
     logging:
       driver: "json-file"
       options:
@@ -100,12 +157,13 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: 2G
+          cpus: '2'
+          memory: 4G
     logging:
       driver: "json-file"
       options:
-        max-size: "50m"
+        max-size: "100m"
         max-file: "10"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  # Production volumes already defined in the base compose file
