@@ -28,16 +28,36 @@ This document provides guidelines for using Claude and MCP tools to develop the 
 - **Writing/Editing Files**: Use `write_file` for new content and `edit_file` for modifying existing files.
 - **Directory Management**: Use `create_directory`, `list_directory`, and `directory_tree` to organize assets.
 - **File Management**: Use `move_file`, `search_files`, and `get_file_info` as needed.
+- **Environment Check**: Use `list_allowed_directories` to understand accessible file paths.
+
+### Knowledge Graph Tools
+Use these tools to document and maintain project architecture and game mechanics:
+- **Creating Information**: `create_entities` to document game mechanics, UI components, and API endpoints; `create_relations` to map relationships between components; `add_observations` to add details about features.
+- **Managing Information**: `delete_entities`, `delete_observations`, `delete_relations` to refine architecture documentation.
+- **Retrieving Information**: `read_graph`, `search_nodes`, `open_nodes` to recall implementation details and design decisions.
 
 ### Web Tools
-Use these for research and reference:
-- **Search**: `brave_web_search` for game mechanics research and API documentation.
-- **Web Automation**: `puppeteer_*` tools for scraping game information when needed.
+- **Search**: 
+  - `brave_web_search` for game mechanics research and API documentation.
+  - `brave_local_search` for finding location-specific information about game resources, events, or community meetups.
+- **Web Automation**: Use Puppeteer tools for advanced data collection:
+  - `puppeteer_navigate` to visit game websites and wikis
+  - `puppeteer_screenshot` to capture UI references or game mechanics
+  - `puppeteer_click`, `puppeteer_fill`, `puppeteer_select` for interacting with game sites
+  - `puppeteer_evaluate` to extract structured data from wikis and forums
 - **Content Fetching**: `fetch` for retrieving reference materials.
 
 ### Code Execution and Analysis
-- **REPL**: Use the JavaScript REPL for testing frontend logic, data processing, and visualization prototypes.
-- **Artifacts**: Create artifacts for code snippets, UI components, and visualization mockups.
+- **REPL**: Use the JavaScript REPL for testing frontend logic, data processing, and visualization prototypes:
+  - Test data parsing and transformation from CSV or JSON files
+  - Prototype chart visualizations before implementing in components
+  - Verify authentication and API request flows
+  - Test vector similarity algorithms for the search functionality
+- **Artifacts**: Create artifacts for different aspects of the project:
+  - Code artifacts for reusable components and API integrations
+  - React artifacts for interactive UI prototypes
+  - SVG artifacts for resource maps and game visualizations
+  - Markdown artifacts for detailed documentation
 
 ## PROJECT OVERVIEW
 
@@ -88,24 +108,27 @@ ashes-of-creation-assistant/
 
 ### Research Phase
 1. Explore existing files to understand the current implementation
-2. Review related components in the codebase
-3. Document findings for reference
+2. Use Knowledge Graph to document discovered components and relationships
+3. Use Web Search and Puppeteer to gather game mechanics information
+4. Review related components in the codebase
 
 ### Design Phase
 1. Plan changes consistent with the existing architecture
-2. Consider both frontend and backend requirements
+2. Use Knowledge Graph to map relationships between new and existing components
 3. Create diagrams or mockups for complex features
+4. Use REPL to prototype data structures and algorithms
 
 ### Implementation Phase
-1. Use the REPL to prototype and test logic
-2. Write modular code with proper error handling
-3. Implement features incrementally
-4. Respect authentication requirements for protected features
+1. Use REPL to validate implementation approaches
+2. Create artifacts for new components and integrations
+3. Implement features incrementally with proper error handling
+4. Document new components in the Knowledge Graph
 
 ### Testing Phase
-1. Test with Docker environment where appropriate
-2. Verify integration with existing components
-3. Ensure proper error handling and edge cases
+1. Use REPL to test data processing and frontend logic
+2. Use Puppeteer to validate web scraping functionality
+3. Test with Docker environment where appropriate
+4. Verify integration with existing components
 
 ## CODING STANDARDS
 
@@ -127,19 +150,66 @@ ashes-of-creation-assistant/
    - Maintain separation of concerns
    - Document public APIs and interfaces
 
+## KNOWLEDGE GRAPH USAGE
+
+1. **Document Architecture**:
+   - Create entities for major components (Frontend, Backend, Data Pipeline)
+   - Add relations between components to show dependencies
+   - Document API endpoints and their relationships
+
+2. **Game Mechanics Documentation**:
+   - Create entities for game systems (Combat, Crafting, Economy)
+   - Document relationships between game systems
+   - Store observations about game mechanics for AI assistant reference
+
+3. **Implementation Tracking**:
+   - Create entities for features in development
+   - Track implementation status and dependencies
+   - Document design decisions and their rationales
+
 ## ARTIFACT USAGE
 
-1. Use code artifacts for standalone, reusable components
-2. Use markdown artifacts for detailed documentation
-3. Use React artifacts for interactive UI prototypes
-4. Use SVG artifacts for visualization mockups
+1. **Code Artifacts**:
+   - Frontend components with proper TypeScript typing
+   - Backend API endpoint implementations
+   - Data processing pipelines
+
+2. **React Artifacts**:
+   - Interactive UI components for game mechanics
+   - Build planner interface prototypes
+   - Resource map visualizations
+
+3. **SVG Artifacts**:
+   - Game world maps with resource locations
+   - Character skill trees and advancement paths
+   - Economic system visualizations
+
+4. **Markdown Artifacts**:
+   - Detailed game mechanics documentation
+   - Implementation guides for specific features
+   - API documentation for backend services
 
 ## REPL BEST PRACTICES
 
-1. Use for prototyping data processing logic
-2. Test frontend components before implementation
-3. Use console.log for debugging and verification
-4. Validate API response handling
+1. **Data Processing**:
+   - Prototype CSV and JSON parsing for game data
+   - Test vector embedding and similarity algorithms
+   - Validate data transformation pipelines
+
+2. **Frontend Logic**:
+   - Test state management logic
+   - Prototype chart and visualization code
+   - Verify form validation and submission
+
+3. **API Integration**:
+   - Simulate API requests and response handling
+   - Test authentication flows
+   - Validate error handling
+
+4. **Debugging**:
+   - Use console.log for step-by-step validation
+   - Test edge cases and error conditions
+   - Benchmark performance-critical operations
 
 ## IMPLEMENTATION STATUS AND PRIORITIES
 
@@ -181,4 +251,13 @@ For AI features, the application uses vector search:
 3. User queries embedded and compared against stored vectors
 4. Results ranked by similarity and returned with context
 
-By following these instructions, we can efficiently develop the MyAshes.ai assistant using Claude's capabilities and the MCP toolset. Always focus on providing fully functional, complete implementations that follow the established patterns and architecture of the project.
+## PUPPETEER USAGE FOR DATA ACQUISITION
+
+For gathering game data and keeping information current:
+1. Use Puppeteer to navigate to official game sources and community wikis
+2. Automate the extraction of game mechanics, item stats, and resource information
+3. Take screenshots of relevant game UI for reference when implementing features
+4. Use JavaScript evaluation to parse structured data from websites
+5. Integrate extracted data into the vector database for AI assistant queries
+
+By following these instructions, we can efficiently develop the MyAshes.ai assistant using Claude's capabilities and the full range of MCP tools. Always focus on providing fully functional, complete implementations that follow the established patterns and architecture of the project.
