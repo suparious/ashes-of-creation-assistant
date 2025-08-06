@@ -7,14 +7,14 @@ beautifulsoup4==4.12.2
 pandas==2.1.2
 numpy==1.26.1
 pillow==11.1.0
-torch==2.6.0
+torch==2.7.1
 torchvision==0.19.0
 torchaudio==2.4.0
 tqdm==4.67.1
 loguru==0.7.2
 pydantic>=2.0.0,<2.7.0
 asyncio==3.4.3
-aiohttp==3.11.16
+aiohttp==3.12.14
 playwright==1.39.0
 lxml==4.9.3
 streamlit==1.44.1
