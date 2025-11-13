@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myashes-backend
+  namespace: myashes-backend
+  labels:
+    app: myashes-backend
+spec:
+  replicas: 2  # HA for API backend
+  selector:
+    matchLabels:
+      app: myashes-backend
+  template:
+    metadata:
+      labels:
+        app: myashes-backend
+    spec:
+      # Init container to wait for PostgreSQL
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox:1.36
+        command: ['sh', '-c', 'until nc -z -v -w30 $POSTGRES_HOST $POSTGRES_PORT; do echo "Waiting for PostgreSQL..."; sleep 5; done']
+        envFrom:
+        - configMapRef:
+            name: myashes-backend-config
+
+      containers:
+      - name: myashes-backend
+        image: suparious/myashes-backend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+
+        # Environment from ConfigMap
+        envFrom:
+        - configMapRef:
+            name: myashes-backend-config
+        - secretRef:
+            name: myashes-backend-secrets
+
+        # Construct DATABASE_URL from individual components
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
+
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 2Gi  # ML dependencies need more memory
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+
+        # Security context
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: myashes-backend
+  namespace: myashes-backend
+  labels:
+    app: myashes-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: myashes-backend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8000
+    protocol: TCP

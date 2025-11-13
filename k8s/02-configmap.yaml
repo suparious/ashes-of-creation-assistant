@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myashes-backend-config
+  namespace: myashes-backend
+data:
+  # Application settings
+  APP_NAME: "MyAshes.ai API"
+  API_V1_STR: "/api/v1"
+  DEBUG: "false"
+
+  # Database settings (using platform PostgreSQL CNPG cluster)
+  POSTGRES_HOST: "postgres-cluster-rw.postgres-system.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "myashes"
+
+  # Milvus vector database (to be deployed in data tier)
+  MILVUS_HOST: "milvus.milvus-system.svc.cluster.local"
+  MILVUS_PORT: "19530"
+
+  # Redis cache (optional - can be enabled when Redis is deployed)
+  # REDIS_HOST: "redis.myashes-backend.svc.cluster.local"
+  # REDIS_PORT: "6379"
+
+  # CORS origins
+  BACKEND_CORS_ORIGINS: '["https://myashes.lab.hq.solidrust.net", "https://myashes.ai"]'

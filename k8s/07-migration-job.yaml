@@ -1,0 +1,67 @@
+# Database Migration Job
+# Run this manually before deploying the application:
+# kubectl apply -f k8s/07-migration-job.yaml
+# kubectl wait --for=condition=complete --timeout=300s job/myashes-db-migration -n myashes-backend
+#
+# Or use deploy.ps1 which handles this automatically
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: myashes-db-migration
+  namespace: myashes-backend
+  labels:
+    app: myashes-backend
+    component: migration
+spec:
+  ttlSecondsAfterFinished: 300  # Clean up 5 minutes after completion
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: myashes-backend
+        component: migration
+    spec:
+      restartPolicy: OnFailure
+
+      # Init container to wait for PostgreSQL
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox:1.36
+        command: ['sh', '-c', 'until nc -z -v -w30 $POSTGRES_HOST $POSTGRES_PORT; do echo "Waiting for PostgreSQL..."; sleep 5; done']
+        envFrom:
+        - configMapRef:
+            name: myashes-backend-config
+
+      containers:
+      - name: migration
+        image: suparious/myashes-backend:latest
+        imagePullPolicy: Always
+        command: ["alembic", "upgrade", "head"]
+
+        # Environment from ConfigMap and Secret
+        envFrom:
+        - configMapRef:
+            name: myashes-backend-config
+        - secretRef:
+            name: myashes-backend-secrets
+
+        # Construct DATABASE_URL from individual components
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
+
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
