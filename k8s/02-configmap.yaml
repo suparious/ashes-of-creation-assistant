@@ -10,13 +10,13 @@ data:
   DEBUG: "false"
 
   # Database settings (using platform PostgreSQL CNPG cluster)
-  POSTGRES_HOST: "postgres-cluster-rw.postgres-system.svc.cluster.local"
+  POSTGRES_HOST: "platform-postgres-rw.data-platform.svc.cluster.local"
   POSTGRES_PORT: "5432"
   POSTGRES_DB: "myashes"
 
-  # Milvus vector database (to be deployed in data tier)
-  MILVUS_HOST: "milvus.milvus-system.svc.cluster.local"
-  MILVUS_PORT: "19530"
+  # Milvus vector database (optional - not yet deployed)
+  # MILVUS_HOST: "milvus.data-platform.svc.cluster.local"
+  # MILVUS_PORT: "19530"
 
   # Redis cache (optional - can be enabled when Redis is deployed)
   # REDIS_HOST: "redis.myashes-backend.svc.cluster.local"
