@@ -26,7 +26,7 @@ spec:
 
       containers:
       - name: myashes-backend
-        image: suparious/myashes-backend:latest
+        image: ghcr.io/suparious/myashes-backend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8000

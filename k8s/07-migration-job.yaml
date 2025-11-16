@@ -34,7 +34,7 @@ spec:
 
       containers:
       - name: migration
-        image: suparious/myashes-backend:latest
+        image: ghcr.io/suparious/myashes-backend:latest
         imagePullPolicy: Always
         command: ["alembic", "upgrade", "head"]
 
