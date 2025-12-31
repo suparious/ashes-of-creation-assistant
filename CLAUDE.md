@@ -2,7 +2,7 @@
 
 **Project**: AI-powered assistant backend for Ashes of Creation MMORPG
 **Status**: K8s deployment ready (backend only)
-**Last Updated**: 2025-11-12
+**Last Updated**: 2025-12-30
 **Shaun's Golden Rule**: **No workarounds, no temporary fixes, no disabled functionality. Full solutions only.**
 
 ---
@@ -80,12 +80,14 @@ The backend is deployed on the SRT-HQ Kubernetes platform and integrates with:
 **Architecture**:
 ```
 Frontend (myashes.ai - GitHub Pages)
+│   └─→ SolidRusT/myashes.github.io
     ↓
 Artemis Proxy (AWS HTTP/3)
     ↓
 K8s Ingress (myashes-backend.lab.hq.solidrust.net)
     ↓
 FastAPI Backend (2 replicas)
+│   └─→ Suparious/ashes-of-creation-assistant (this repo)
     ↓
 Platform PostgreSQL (CNPG) + Platform Milvus (Vector DB)
 ```
@@ -95,9 +97,14 @@ Platform PostgreSQL (CNPG) + Platform Milvus (Vector DB)
 ## 🗂️ LOCATIONS
 
 **Repository**:
-- GitHub: `git@github.com:SolidRusT/ashes-of-creation-assistant.git`
-- Submodule: `/mnt/c/Users/shaun/repos/srt-hq-k8s/manifests/apps/myashes-backend/`
-- Standalone: `/mnt/c/Users/shaun/repos/ashes-of-creation-assistant/`
+- GitHub: `git@github.com:Suparious/ashes-of-creation-assistant.git`
+- Submodule: `/Users/shaun/repos/srt-hq-k8s/manifests/apps/myashes-backend/`
+- Standalone: `/Users/shaun/repos/ashes-of-creation-assistant/`
+
+**Landing Page** (separate repo):
+- GitHub: `git@github.com:SolidRusT/myashes.github.io.git`
+- Location: `/Users/shaun/repos/myashes.github.io/`
+- Live: https://myashes.ai
 
 **Deployment**:
 - Dev: `cd backend && uvicorn app.main:app --reload` → `http://localhost:8000`
@@ -505,6 +512,8 @@ You're doing well if:
 
 | Date | Change | Impact |
 |------|--------|--------|
+| 2025-12-30 | Landing page live | myashes.ai deployed via SolidRusT/myashes.github.io |
+| 2025-12-30 | Updated paths to macOS | Migrated from WSL to native macOS |
 | 2025-11-12 | Initial onboarding | Backend added to SRT-HQ K8s platform |
 | 2025-11-12 | Created K8s Dockerfile | Multi-stage build optimized for K8s |
 | 2025-11-12 | Created K8s manifests | Deployment with ConfigMap, Secret, Migration Job |
@@ -513,7 +522,7 @@ You're doing well if:
 
 ---
 
-**Last Updated**: 2025-11-12
+**Last Updated**: 2025-12-30
 **Status**: K8s Deployment Ready (Backend Only)
 **Platform**: SRT-HQ Kubernetes
 **Access**: https://myashes-backend.lab.hq.solidrust.net
