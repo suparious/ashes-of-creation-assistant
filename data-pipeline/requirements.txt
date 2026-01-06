@@ -14,7 +14,7 @@ tqdm==4.67.1
 loguru==0.7.2
 pydantic>=2.0.0,<2.7.0
 asyncio==3.4.3
-aiohttp==3.12.14
+aiohttp==3.13.3
 playwright==1.39.0
 lxml==4.9.3
 streamlit==1.44.1
