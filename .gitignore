@@ -155,3 +155,6 @@ nginx/letsencrypt/accounts/
 .coverage
 coverage.xml
 *.cover
+
+# Claude Code local settings (workstation-specific)
+.claude/settings.local.json

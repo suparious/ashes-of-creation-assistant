@@ -17,39 +17,23 @@
 1. Read "Project Overview" below
 2. Understand this deploys BACKEND ONLY (frontend is GitHub Pages)
 3. Check deployment dependencies (PostgreSQL, Milvus)
-4. Use ChromaDB for platform integration questions
+4. Check srt-hq-k8s CLAUDE.md for platform integration questions
 
 ---
 
-## 📚 PLATFORM INTEGRATION (ChromaDB Knowledge Base)
+## 📚 PLATFORM INTEGRATION
 
-**When working in this submodule**, you cannot access the parent srt-hq-k8s repository files. Use ChromaDB to query platform capabilities and integration patterns.
+**Related Repositories**:
+- **srt-hq-k8s**: `/Users/shaun/repos/srt-hq-k8s/` - Kubernetes platform (12 nodes)
+- **srt-hq-vllm**: `/Users/shaun/repos/srt-hq-vllm/` - vLLM inference backend
+- **srt-data-layer**: `/Users/shaun/repos/srt-data-layer/` - Data Layer API (knowledge base)
+- **myashes.github.io**: `/Users/shaun/repos/myashes.github.io/` - Frontend landing page
 
-**Collection**: `srt-hq-k8s-platform-guide` (43 docs, updated 2025-11-11)
-
-**Why This Matters for MyAshes.ai Backend**:
-The backend is deployed on the SRT-HQ Kubernetes platform and integrates with:
-- **Platform PostgreSQL** (CNPG cluster) for relational data
-- **Platform Milvus** (data tier) for vector embeddings
-- **Platform vLLM** (via Artemis proxy) for AI inference
-- **Platform ingress** for SSL and routing
-
-**Query When You Need**:
-- Platform architecture and three-tier taxonomy
-- PostgreSQL connection details and database management
-- Milvus vector store integration
-- vLLM inference endpoint configuration
-- Platform monitoring and logging integration
-- Ingress and SSL certificate patterns
-
-**Example Queries**:
-```
-"What is the srt-hq-k8s platform architecture?"
-"How do I connect to the PostgreSQL CNPG cluster?"
-"What is the Milvus vector store endpoint?"
-"How does SSL certificate automation work?"
-"What storage classes are available?"
-```
+**Platform Features Used**:
+- **PostgreSQL**: CNPG cluster for relational data
+- **Milvus**: Vector store for embeddings (prediction-engine namespace)
+- **vLLM**: `http://vllm.inference.svc.cluster.local:8000/v1` for AI inference
+- **Ingress**: nginx-ingress with TLS (cert-manager DNS-01)
 
 **When NOT to Query**:
 - ❌ FastAPI development (use FastAPI docs)
@@ -513,7 +497,7 @@ You're doing well if:
 ✅ You understand this is backend-only deployment (frontend separate)
 ✅ You know it integrates with platform PostgreSQL and Milvus
 ✅ You understand migration job runs before deployment
-✅ You reference ChromaDB for platform questions
+✅ You reference srt-hq-k8s for platform questions
 ✅ You provide complete solutions (never workarounds)
 ✅ You use PowerShell scripts for deployment
 ✅ You validate changes work end-to-end
